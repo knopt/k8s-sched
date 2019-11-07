@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/golang/glog"
 	"io"
 	v1 "k8s.io/api/core/v1"
 	schedulerapi "k8s.io/kubernetes/pkg/scheduler/api"
@@ -42,7 +43,7 @@ var (
 				}
 			}
 
-			fmt.Printf("assigned priorities: %v\n", hostpriorityList)
+			glog.Infof("assigned priorities: %v\n", hostpriorityList)
 
 			return &hostpriorityList, nil
 		},
@@ -54,8 +55,9 @@ func main() {
 	http.HandleFunc(prioritizePrefix, prioritizeHandler)
 	http.HandleFunc(preemptionPrexif, preemptionHandler)
 
-	fmt.Println("serving at localhost:80 !")
-	log.Fatal(http.ListenAndServe(":80", nil))
+	glog.Info("serving at localhost:80")
+
+	glog.Fatal(http.ListenAndServe(":80", nil))
 }
 
 func checkBody(w http.ResponseWriter, r *http.Request) {
@@ -66,14 +68,14 @@ func checkBody(w http.ResponseWriter, r *http.Request) {
 }
 
 func filterHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("%v", r)
-	fmt.Fprintf(w, "OK filter")
+	glog.Infof("%v", r)
+	glog.Info(w, "OK filter")
 
 	checkBody(w, r)
 
 	var buf bytes.Buffer
 	body := io.TeeReader(r.Body, &buf)
-	fmt.Print("ExtenderArgs = ", buf.String())
+	glog.Infof("ExtenderArgs = ", buf.String())
 
 	var extenderArgs schedulerapi.ExtenderArgs
 	var extenderFilterResult *schedulerapi.ExtenderFilterResult
@@ -99,13 +101,13 @@ func filterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("%v", r)
+	glog.Infof("%v", r)
 
 	checkBody(w, r)
 
 	var buf bytes.Buffer
 	body := io.TeeReader(r.Body, &buf)
-	log.Print("info: ", prioritize.Name, " ExtenderArgs = ", buf.String())
+	glog.Info("info: ", prioritize.Name, " ExtenderArgs = ", buf.String())
 
 	var extenderArgs schedulerapi.ExtenderArgs
 	var hostPriorityList *schedulerapi.HostPriorityList
@@ -123,7 +125,7 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 	if resultBody, err := json.Marshal(hostPriorityList); err != nil {
 		panic(err)
 	} else {
-		log.Print("info: ", prioritize.Name, " hostPriorityList = ", string(resultBody))
+		glog.Info("info: ", prioritize.Name, " hostPriorityList = ", string(resultBody))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(resultBody)
@@ -131,7 +133,7 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func preemptionHandler(W http.ResponseWriter, r *http.Request) {
-	fmt.Printf("%v", r)
+	glog.Errorf("%v", r)
 
 	panic("preemption handler not implemented")
 }
