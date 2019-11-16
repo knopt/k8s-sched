@@ -3,6 +3,7 @@ module github.com/knopt/k8s-sched-extender
 go 1.12
 
 require (
+	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	k8s.io/api v0.0.0
 	k8s.io/kubernetes v1.15.0
 )

@@ -36,10 +36,10 @@ data:
         {"name" : "HostName"}
       ],
       "priorities" : [
-        {"name" : "LeastRequestedPriority", "weight" : 0},
-        {"name" : "BalancedResourceAllocation", "weight" : 0},
-        {"name" : "ServiceSpreadingPriority", "weight" : 0},
-        {"name" : "EqualPriority", "weight" : 0}
+        {"name" : "LeastRequestedPriority", "weight" : 1},
+        {"name" : "BalancedResourceAllocation", "weight" : 1},
+        {"name" : "ServiceSpreadingPriority", "weight" : 1},
+        {"name" : "EqualPriority", "weight" : 1}
       ],
       "extenders" : [{
         "urlPrefix": "http://localhost/scheduler",
@@ -70,6 +70,7 @@ spec:
     metadata:
       labels:
         app: my-scheduler
+        version: 0.0.21
     spec:
       volumes:
         - name: my-scheduler-config
@@ -88,14 +89,20 @@ spec:
               mountPath: /my-scheduler
         - name: my-scheduler-extender-ctr
           image: a/b:c
-          imagePullPolicy: IfNotPresent
-          livenessProbe:
-            httpGet:
-              path: /version
-              port: 80
-          readinessProbe:
-            httpGet:
-              path: /version
-              port: 80
+          imagePullPolicy: Always
+#          livenessProbe:
+#            httpGet:
+#              path: /version
+#              port: 80
+#            initialDelaySeconds: 30
+#            periodSeconds: 15
+#          readinessProbe:
+#            httpGet:
+#              path: /version
+#              port: 80
+#            initialDelaySeconds: 3
+#            periodSeconds: 3
           ports:
             - containerPort: 80
+              protocol: TCP
+      serviceAccount: admin-user

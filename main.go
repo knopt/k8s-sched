@@ -51,13 +51,19 @@ var (
 )
 
 func main() {
+
+	//flag.Set("v", "2")
+	//flag.Parse()
+
+	glog.Error("starting main")
 	http.HandleFunc(filterPrefix, filterHandler)
 	http.HandleFunc(prioritizePrefix, prioritizeHandler)
 	http.HandleFunc(preemptionPrexif, preemptionHandler)
+	http.HandleFunc(versionPath, versionHandler)
 
-	glog.Info("serving at localhost:80")
+	glog.Error("serving at localhost:8080")
 
-	glog.Fatal(http.ListenAndServe(":80", nil))
+	glog.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func checkBody(w http.ResponseWriter, r *http.Request) {
@@ -68,8 +74,8 @@ func checkBody(w http.ResponseWriter, r *http.Request) {
 }
 
 func filterHandler(w http.ResponseWriter, r *http.Request) {
-	glog.Infof("%v", r)
-	glog.Info(w, "OK filter")
+	glog.Error("filter: %v", r)
+	glog.Error(w, "OK filter")
 
 	checkBody(w, r)
 
@@ -101,7 +107,7 @@ func filterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
-	glog.Infof("%v", r)
+	glog.Infof("prioritize %v", r)
 
 	checkBody(w, r)
 
@@ -136,5 +142,13 @@ func preemptionHandler(W http.ResponseWriter, r *http.Request) {
 	glog.Errorf("%v", r)
 
 	panic("preemption handler not implemented")
+}
+
+func versionHandler(w http.ResponseWriter, r *http.Request) {
+	glog.Errorf("pinged for version")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("0.0.0"))
 }
 
