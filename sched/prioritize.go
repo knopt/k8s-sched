@@ -1,4 +1,4 @@
-package main
+package sched
 
 import (
 	"k8s.io/api/core/v1"

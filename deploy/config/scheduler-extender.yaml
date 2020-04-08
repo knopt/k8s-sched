@@ -42,9 +42,9 @@ data:
         {"name" : "EqualPriority", "weight" : 1}
       ],
       "extenders" : [{
-        "urlPrefix": "http://localhost/scheduler",
-        "filterVerb": "predicates/always_true",
-        "prioritizeVerb": "priorities/zero_score",
+        "urlPrefix": "http://localhost:8080/scheduler",
+        "filterVerb": "filter",
+        "prioritizeVerb": "prioritize",
         "preemptVerb": "preemption",
         "bindVerb": "",
         "weight": 1,
@@ -70,7 +70,7 @@ spec:
     metadata:
       labels:
         app: my-scheduler
-        version: 0.0.21
+        version: 0.0.33
     spec:
       volumes:
         - name: my-scheduler-config
@@ -88,20 +88,20 @@ spec:
             - name: my-scheduler-config
               mountPath: /my-scheduler
         - name: my-scheduler-extender-ctr
-          image: a/b:c
+          image: knopt/k8s-ext:3110
           imagePullPolicy: Always
-#          livenessProbe:
-#            httpGet:
-#              path: /version
-#              port: 80
-#            initialDelaySeconds: 30
-#            periodSeconds: 15
-#          readinessProbe:
-#            httpGet:
-#              path: /version
-#              port: 80
-#            initialDelaySeconds: 3
-#            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /version
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /version
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
           ports:
             - containerPort: 80
               protocol: TCP

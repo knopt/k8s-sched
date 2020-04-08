@@ -5,7 +5,11 @@ go 1.12
 require (
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	k8s.io/api v0.0.0
+	k8s.io/apimachinery v0.0.0
+	k8s.io/client-go v11.0.0+incompatible
+	k8s.io/kube-scheduler v0.18.0 // indirect
 	k8s.io/kubernetes v1.15.0
+	k8s.io/metrics v0.18.0
 )
 
 replace (

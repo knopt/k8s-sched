@@ -18,10 +18,10 @@ COPY . .
 RUN go install -ldflags "-s -w -X main.version=$VERSION"
 
 # runtime image
-#FROM gcr.io/google_containers/ubuntu-slim:0.14
-FROM ubuntu:18.04
+FROM gcr.io/google_containers/ubuntu-slim:0.14
+
 RUN apt-get update && apt-get install -y curl iputils-ping wget dnsutils
 COPY --from=builder /go/bin/k8s-sched-extender /usr/bin/k8s-sched-extender
 ENTRYPOINT ["k8s-sched-extender"]
 
-EXPOSE 80
+EXPOSE 8080

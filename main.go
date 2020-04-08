@@ -3,14 +3,18 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/golang/glog"
-	"io"
-	v1 "k8s.io/api/core/v1"
-	schedulerapi "k8s.io/kubernetes/pkg/scheduler/api"
-
 	"fmt"
+	"github.com/knopt/k8s-sched-extender/cmn"
+	"io"
 	"log"
 	"net/http"
+
+	"github.com/golang/glog"
+	"github.com/knopt/k8s-sched-extender/sched"
+	"github.com/knopt/k8s-sched-extender/stats"
+
+	v1 "k8s.io/api/core/v1"
+	schedulerapi "k8s.io/kubernetes/pkg/scheduler/api"
 )
 
 const (
@@ -19,11 +23,11 @@ const (
 	bindPath         = apiPrefix + "/bind"
 	filterPrefix     = apiPrefix + "/filter"
 	prioritizePrefix = apiPrefix + "/prioritize"
-	preemptionPrexif = apiPrefix + "/preemption"
+	preemptionPrefix = apiPrefix + "/preemption"
 )
 
 var (
-	filter = Filter{
+	filter = sched.Filter{
 		Name: "always_true",
 		Func: func(node v1.Node, pod *v1.Pod) bool {
 			fmt.Printf("returning true in filtering nodes")
@@ -31,34 +35,33 @@ var (
 		},
 	}
 	
-	prioritize = Prioritize{
+	prioritize = sched.Prioritize{
 		Name: "always_1",
 		Func: func(pod v1.Pod, nodes []v1.Node) (*schedulerapi.HostPriorityList, error) {
-			var hostpriorityList schedulerapi.HostPriorityList
-			hostpriorityList = make([]schedulerapi.HostPriority, len(nodes))
+			var hostPriorityList schedulerapi.HostPriorityList
+			hostPriorityList = make([]schedulerapi.HostPriority, len(nodes))
 			for i, node := range nodes {
-				hostpriorityList[i] = schedulerapi.HostPriority{
+				hostPriorityList[i] = schedulerapi.HostPriority{
 					Host:  node.Name,
 					Score: i,
 				}
 			}
 
-			glog.Infof("assigned priorities: %v\n", hostpriorityList)
+			glog.Infof("assigned priorities: %v\n", hostPriorityList)
 
-			return &hostpriorityList, nil
+			return &hostPriorityList, nil
 		},
 	}
 )
 
 func main() {
-
-	//flag.Set("v", "2")
-	//flag.Parse()
-
 	glog.Error("starting main")
+	stats.Registry = stats.NewStatsRunner()
+	go stats.Registry.Run()
+
 	http.HandleFunc(filterPrefix, filterHandler)
 	http.HandleFunc(prioritizePrefix, prioritizeHandler)
-	http.HandleFunc(preemptionPrexif, preemptionHandler)
+	http.HandleFunc(preemptionPrefix, preemptionHandler)
 	http.HandleFunc(versionPath, versionHandler)
 
 	glog.Error("serving at localhost:8080")
@@ -74,8 +77,7 @@ func checkBody(w http.ResponseWriter, r *http.Request) {
 }
 
 func filterHandler(w http.ResponseWriter, r *http.Request) {
-	glog.Error("filter: %v", r)
-	glog.Error(w, "OK filter")
+	glog.Errorf("filter: %v", r)
 
 	checkBody(w, r)
 
@@ -102,12 +104,13 @@ func filterHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print("info: ", filter.Name, " extenderFilterResult = ", string(resultBody))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(resultBody)
+		_, err = w.Write(resultBody)
+		cmn.AssertNoErr(err)
 	}
 }
 
 func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
-	glog.Infof("prioritize %v", r)
+	glog.Errorf("prioritize %v", r)
 
 	checkBody(w, r)
 
@@ -145,8 +148,6 @@ func preemptionHandler(W http.ResponseWriter, r *http.Request) {
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
-	glog.Errorf("pinged for version")
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("0.0.0"))
