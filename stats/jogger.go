@@ -69,8 +69,6 @@ func (s *StatsRunner) fetch(metricsGetter *Metrics) {
 		s.podsMetrics = podsMetrics
 	}
 
-
-	//glog.Warning(cmn.NodeMetrics2S(s.nodesMetrics))
 	glog.Warning("%v", s.nodesMetrics)
 	glog.Warning(cmn.PodMetrics2S(s.podsMetrics))
 }
