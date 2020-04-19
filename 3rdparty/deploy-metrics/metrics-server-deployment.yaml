@@ -29,13 +29,15 @@ spec:
         emptyDir: {}
       containers:
       - name: metrics-server
-        image: k8s.gcr.io/metrics-server-amd64:v0.3.5
+        image: k8s.gcr.io/metrics-server-amd64:v0.3.6
         imagePullPolicy: IfNotPresent
         args:
           - --cert-dir=/tmp
+          - --metric-resolution=15s
           - --secure-port=4443
-          - --kubelet-preferred-address-types=InternalIP
           - --kubelet-insecure-tls
+          - --kubelet-preferred-address-types=InternalIP,Hostname
+          - --v=4
         ports:
         - name: main-port
           containerPort: 4443
@@ -50,3 +52,4 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
         kubernetes.io/arch: "amd64"
+      hostNetwork: true

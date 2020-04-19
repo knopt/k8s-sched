@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/knopt/k8s-sched-extender/cmn"
 	"io"
 	"log"
@@ -30,7 +29,6 @@ var (
 	filter = sched.Filter{
 		Name: "always_true",
 		Func: func(node v1.Node, pod *v1.Pod) bool {
-			fmt.Printf("returning true in filtering nodes")
 			return true
 		},
 	}
@@ -41,13 +39,12 @@ var (
 			var hostPriorityList schedulerapi.HostPriorityList
 			hostPriorityList = make([]schedulerapi.HostPriority, len(nodes))
 			for i, node := range nodes {
+				glog.Warningf("node %s cpu capacity %s, allocatable %s", node.Name, node.Status.Capacity.Cpu(), node.Status.Allocatable.Cpu())
 				hostPriorityList[i] = schedulerapi.HostPriority{
 					Host:  node.Name,
 					Score: i,
 				}
 			}
-
-			glog.Infof("assigned priorities: %v\n", hostPriorityList)
 
 			return &hostPriorityList, nil
 		},
@@ -126,10 +123,13 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if list, err := prioritize.Handler(extenderArgs); err != nil {
+		glog.Errorf("prioritize handler failed")
 		panic(err)
 	} else {
 		hostPriorityList = list
 	}
+
+	glog.Errorf("priority list: %v", hostPriorityList)
 
 	if resultBody, err := json.Marshal(hostPriorityList); err != nil {
 		panic(err)
@@ -141,7 +141,7 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func preemptionHandler(W http.ResponseWriter, r *http.Request) {
+func preemptionHandler(w http.ResponseWriter, r *http.Request) {
 	glog.Errorf("%v", r)
 
 	panic("preemption handler not implemented")

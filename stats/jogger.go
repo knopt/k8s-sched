@@ -1,7 +1,6 @@
 package stats
 
 import (
-	"github.com/knopt/k8s-sched-extender/cmn"
 	"k8s.io/kubernetes/pkg/kubelet/kubeletconfig/util/log"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 
@@ -40,6 +39,8 @@ func (s *StatsRunner) Run() {
 		metricsGetter = NewMetrics()
 	)
 
+	defer ticker.Stop()
+
 	log.Infof("StatsRunner starting with interval %s\n", fetchInterval)
 
 	for {
@@ -62,15 +63,15 @@ func (s *StatsRunner) fetch(metricsGetter *Metrics) {
 		glog.Errorf("Failed to get nodes metrics: %v", err)
 	} else {
 		s.nodesMetrics = NodeMetricsFromInternal(nodeMetrics)
+		glog.Warning("node metrics: %v", s.nodesMetrics)
 	}
 	if podsMetrics, err := metricsGetter.GetPodsMetrics(); err != nil {
 		glog.Errorf("Failed to get pods metrics: %v", err)
 	} else {
 		s.podsMetrics = podsMetrics
+		//glog.Warning("pod metrics: %v", cmn.PodMetrics2S(s.podsMetrics))
 	}
 
-	glog.Warning("%v", s.nodesMetrics)
-	glog.Warning(cmn.PodMetrics2S(s.podsMetrics))
 }
 
 func (s *StatsRunner) PodsMetrics() *v1beta1.PodMetricsList {

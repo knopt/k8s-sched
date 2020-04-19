@@ -61,7 +61,7 @@ func PodMetrics2S(metrics *v1beta1.PodMetricsList) string {
 func PodMetric2S(metric *v1beta1.PodMetrics) string {
 	sb := strings.Builder{}
 
-	sb.WriteString(fmt.Sprintf("Node %s; Kind %s; Object %s; TypeMeta Kind: %s\n", metric.Name, metric.Kind, metric.ObjectMeta.Name, metric.TypeMeta.Kind))
+	sb.WriteString(fmt.Sprintf("Pod %s; Kind %s; Object %s; TypeMeta Kind: %s\n", metric.Name, metric.Kind, metric.ObjectMeta.Name, metric.TypeMeta.Kind))
 	for _, val := range metric.Containers{
 		sb.WriteString(fmt.Sprintf("CPU: %s: %s\n", val.Name, val.Usage.Cpu()))
 		sb.WriteString(fmt.Sprintf("MEM: %s: %s\n\n", val.Name, val.Usage.Memory()))
