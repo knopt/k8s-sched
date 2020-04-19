@@ -63,7 +63,7 @@ func (s *StatsRunner) fetch(metricsGetter *Metrics) {
 		glog.Errorf("Failed to get nodes metrics: %v", err)
 	} else {
 		s.nodesMetrics = NodeMetricsFromInternal(nodeMetrics)
-		glog.Warning("node metrics: %v", s.nodesMetrics)
+		glog.Warning("node metrics:\n%s", NodeMetrics2S(s.nodesMetrics))
 	}
 	if podsMetrics, err := metricsGetter.GetPodsMetrics(); err != nil {
 		glog.Errorf("Failed to get pods metrics: %v", err)

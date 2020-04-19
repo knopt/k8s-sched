@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/knopt/k8s-sched-extender/cmn"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
+	"strings"
 )
 
 type (
@@ -57,4 +58,17 @@ func NodeMetricsFromInternal(metrics *v1beta1.NodeMetricsList) map[string]*NodeM
 	}
 
 	return res
+}
+
+
+func NodeMetrics2S(metrics map[string]*NodeMetric) string {
+	sb := strings.Builder{}
+
+	for _, v := range metrics {
+		sb.WriteString(v.NodeName + "\n")
+		sb.WriteString("\t"+v.Cpu.String()+"\n")
+		sb.WriteString("\t"+v.Mem.String()+"\n")
+	}
+
+	return sb.String()
 }

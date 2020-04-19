@@ -13,18 +13,18 @@ func AssertNoErr(err error) {
 	}
 }
 
-func NodeMetrics2S(metrics *v1beta1.NodeMetricsList) string {
+func BetaNodeMetrics2S(metrics *v1beta1.NodeMetricsList) string {
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf("nodes items length %d\n\n", len(metrics.Items)))
 
 	for _, metric := range metrics.Items {
-		sb.WriteString(NodeMetric2S(&metric))
+		sb.WriteString(BetaNodeMetric2S(&metric))
 	}
 	sb.WriteString("\n")
 	return sb.String()
 }
 
-func NodeMetric2S(metric *v1beta1.NodeMetrics) string {
+func BetaNodeMetric2S(metric *v1beta1.NodeMetrics) string {
 	sb := strings.Builder{}
 
 	cpuNanoCores, ok := metric.Usage.Cpu().AsInt64()
