@@ -15,6 +15,7 @@ type Preemption struct {
 
 func (b Preemption) Handler(args schedulerapi.ExtenderPreemptionArgs) *schedulerapi.ExtenderPreemptionResult {
 	nodeNameToMetaVictims := b.Func(*args.Pod, args.NodeNameToVictims, args.NodeNameToMetaVictims)
+
 	return &schedulerapi.ExtenderPreemptionResult{
 		NodeNameToMetaVictims: nodeNameToMetaVictims,
 	}

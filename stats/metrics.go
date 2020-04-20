@@ -7,7 +7,9 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
+
 )
+
 
 type Metrics struct {
 	clientSet *metrics.Clientset

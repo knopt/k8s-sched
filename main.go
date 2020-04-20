@@ -3,15 +3,14 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/knopt/k8s-sched-extender/cmn"
 	"io"
 	"log"
 	"net/http"
 
 	"github.com/golang/glog"
+	"github.com/knopt/k8s-sched-extender/cmn"
 	"github.com/knopt/k8s-sched-extender/sched"
 	"github.com/knopt/k8s-sched-extender/stats"
-
 	v1 "k8s.io/api/core/v1"
 	schedulerapi "k8s.io/kubernetes/pkg/scheduler/api"
 )
@@ -27,22 +26,31 @@ const (
 
 var (
 	filter = sched.Filter{
-		Name: "always_true",
+		Name: "p95_filter",
 		Func: func(node v1.Node, pod *v1.Pod) bool {
-			return true
+			fits, err := cmn.PodFitsNode(pod, node, 0.95)
+			if err != nil {
+				glog.Error(err)
+				return false
+			}
+			return fits
 		},
 	}
 	
-	prioritize = sched.Prioritize{
-		Name: "always_1",
+	prioritizeP95 = sched.Prioritize{
+		Name: "p95_prioritize",
 		Func: func(pod v1.Pod, nodes []v1.Node) (*schedulerapi.HostPriorityList, error) {
 			var hostPriorityList schedulerapi.HostPriorityList
 			hostPriorityList = make([]schedulerapi.HostPriority, len(nodes))
 			for i, node := range nodes {
 				glog.Warningf("node %s cpu capacity %s, allocatable %s", node.Name, node.Status.Capacity.Cpu(), node.Status.Allocatable.Cpu())
+				fitsP, err := cmn.PodNodeP(&pod, node, 0.95)
+				if err != nil {
+					return nil, err
+				}
 				hostPriorityList[i] = schedulerapi.HostPriority{
 					Host:  node.Name,
-					Score: i,
+					Score: int(fitsP * 100000),
 				}
 			}
 
@@ -113,7 +121,7 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 
 	var buf bytes.Buffer
 	body := io.TeeReader(r.Body, &buf)
-	glog.Info("info: ", prioritize.Name, " ExtenderArgs = ", buf.String())
+	glog.Info("info: ", prioritizeP95.Name, " ExtenderArgs = ", buf.String())
 
 	var extenderArgs schedulerapi.ExtenderArgs
 	var hostPriorityList *schedulerapi.HostPriorityList
@@ -122,7 +130,7 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	if list, err := prioritize.Handler(extenderArgs); err != nil {
+	if list, err := prioritizeP95.Handler(extenderArgs); err != nil {
 		glog.Errorf("prioritize handler failed")
 		panic(err)
 	} else {
@@ -134,7 +142,7 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 	if resultBody, err := json.Marshal(hostPriorityList); err != nil {
 		panic(err)
 	} else {
-		glog.Info("info: ", prioritize.Name, " hostPriorityList = ", string(resultBody))
+		glog.Info("info: ", prioritizeP95.Name, " hostPriorityList = ", string(resultBody))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(resultBody)

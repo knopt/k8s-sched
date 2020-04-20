@@ -84,16 +84,11 @@ def uniform_cpu_load(cpu_load, min_load, max_load, sigma, timeout, window_size):
 
 
 def any_cpu_load(cpu_load, timeout, window_size, dist):
-    total = 0
-    for d in dist:
-        total += d
-    if total != 100:
-        raise Exception("expected sum of dist to be 100")
-
     steps, steps_done = max(1, timeout/window_size), 0
 
     while True:
         for load in dist:
+            print("running with {}".format(str(load)))
             subprocess.run(["stress-ng", "--cpu", "1", "-l", str(load), "--timeout", "{}s".format(window_size)])
             steps_done += 1
             if steps_done >= steps:

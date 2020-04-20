@@ -1,7 +1,12 @@
 package cmn
 
 import (
+	"encoding/json"
 	"fmt"
+	"gonum.org/v1/gonum/stat/distuv"
+	"k8s.io/apimachinery/pkg/api/resource"
+	"math"
+	"sort"
 	"strings"
 
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
@@ -82,4 +87,76 @@ func B2S(b int64) string {
 	}
 	return fmt.Sprintf("%.1f %cB",
 		float64(b)/float64(div), "kMGTPE"[exp])
+}
+
+func FloatsFromString(s string) ([]float64, error) {
+	b, err := json.Marshal(s)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var floats []float64
+	err = json.Unmarshal(b, floats)
+	return floats, err
+}
+
+func P(pct float64, floats []float64) float64 {
+	sort.Float64s(floats)
+
+	idx := int(math.Ceil(pct * float64(len(floats))))
+	idx = Min(idx, len(floats)-1)
+	idx = Max(idx, 0)
+
+	return floats[idx]
+}
+
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max(a, b int) int {
+	if a < b {
+		return b
+	}
+	return a
+}
+
+func Mean(fs []float64) float64 {
+	total := float64(0)
+	for _, f := range fs {
+		total += f
+	}
+	return total / float64(len(fs))
+}
+
+func Std(fs []float64) float64 {
+	var sd float64
+	mean := Mean(fs)
+
+	for _, f := range fs {
+		sd += math.Pow(f - mean, 2)
+	}
+
+	return math.Sqrt(sd/float64(len(fs)))
+}
+
+func ToCpuCores(cpuResource *resource.Quantity) float64 {
+	cpuNanoCores, ok := cpuResource.AsInt64()
+	if !ok {
+		cpuNanoCores = cpuResource.AsDec().UnscaledBig().Int64()
+	}
+	return float64(cpuNanoCores) / (1000 * 1000 * 1000)
+}
+
+func NormalCDF(mean, std, x float64) float64 {
+	dist := distuv.Normal{
+		Mu:    mean,
+		Sigma: std,
+	}
+
+	return dist.CDF(x)
 }
