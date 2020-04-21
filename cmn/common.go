@@ -3,12 +3,11 @@ package cmn
 import (
 	"encoding/json"
 	"fmt"
-	"gonum.org/v1/gonum/stat/distuv"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"math"
 	"sort"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 )
 
@@ -153,10 +152,5 @@ func ToCpuCores(cpuResource *resource.Quantity) float64 {
 }
 
 func NormalCDF(mean, std, x float64) float64 {
-	dist := distuv.Normal{
-		Mu:    mean,
-		Sigma: std,
-	}
-
-	return dist.CDF(x)
+	return 0.5 * math.Erfc(-(x-mean)/(std*math.Sqrt2))
 }

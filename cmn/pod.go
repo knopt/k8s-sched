@@ -30,7 +30,7 @@ func NodePodsStats(node string) ([]*PodStats, error) {
 	res := make([]*PodStats, 0, len(pods))
 
 	for _, pod := range pods {
-		stats, err := PodMeanStd(pod)
+		stats, err := PodMeanStd(&pod)
 		if err != nil {
 			return nil, err
 		}
