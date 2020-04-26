@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/golang/glog"
@@ -36,7 +35,7 @@ var (
 			return fits
 		},
 	}
-	
+
 	prioritizeP95 = sched.Prioritize{
 		Name: "p95_prioritize",
 		Func: func(pod v1.Pod, nodes []v1.Node) (*schedulerapi.HostPriorityList, error) {
@@ -88,7 +87,6 @@ func filterHandler(w http.ResponseWriter, r *http.Request) {
 
 	var buf bytes.Buffer
 	body := io.TeeReader(r.Body, &buf)
-	glog.Infof("ExtenderArgs = ", buf.String())
 
 	var extenderArgs schedulerapi.ExtenderArgs
 	var extenderFilterResult *schedulerapi.ExtenderFilterResult
@@ -106,7 +104,6 @@ func filterHandler(w http.ResponseWriter, r *http.Request) {
 	if resultBody, err := json.Marshal(extenderFilterResult); err != nil {
 		panic(err)
 	} else {
-		log.Print("info: ", filter.Name, " extenderFilterResult = ", string(resultBody))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, err = w.Write(resultBody)
@@ -151,8 +148,6 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 
 func preemptionHandler(w http.ResponseWriter, r *http.Request) {
 	glog.Errorf("%v", r)
-
-	panic("preemption handler not implemented")
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
@@ -160,4 +155,3 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("0.0.0"))
 }
-

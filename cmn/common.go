@@ -66,7 +66,7 @@ func PodMetric2S(metric *v1beta1.PodMetrics) string {
 	sb := strings.Builder{}
 
 	sb.WriteString(fmt.Sprintf("Pod %s; Kind %s; Object %s; TypeMeta Kind: %s\n", metric.Name, metric.Kind, metric.ObjectMeta.Name, metric.TypeMeta.Kind))
-	for _, val := range metric.Containers{
+	for _, val := range metric.Containers {
 		sb.WriteString(fmt.Sprintf("CPU: %s: %s\n", val.Name, val.Usage.Cpu()))
 		sb.WriteString(fmt.Sprintf("MEM: %s: %s\n\n", val.Name, val.Usage.Memory()))
 	}
@@ -89,14 +89,8 @@ func B2S(b int64) string {
 }
 
 func FloatsFromString(s string) ([]float64, error) {
-	b, err := json.Marshal(s)
-
-	if err != nil {
-		return nil, err
-	}
-
 	var floats []float64
-	err = json.Unmarshal(b, floats)
+	err := json.Unmarshal([]byte(s), &floats)
 	return floats, err
 }
 
@@ -137,10 +131,10 @@ func Std(fs []float64) float64 {
 	mean := Mean(fs)
 
 	for _, f := range fs {
-		sd += math.Pow(f - mean, 2)
+		sd += math.Pow(f-mean, 2)
 	}
 
-	return math.Sqrt(sd/float64(len(fs)))
+	return math.Sqrt(sd / float64(len(fs)))
 }
 
 func ToCpuCores(cpuResource *resource.Quantity) float64 {

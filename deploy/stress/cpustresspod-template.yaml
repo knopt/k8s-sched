@@ -1,24 +1,25 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: cpustress-dist
-  namespace: cpustress-namespace
+  name: cpustress-dist-DATE
+  namespace: cpustress
   labels:
     app: cpustress-dist
   annotations:
     dist: "DIST-PLACEHOLDER"
 spec:
-  schedulerName: my-scheduler
+#  schedulerName: tknopik-scheduler
+  restartPolicy: OnFailure
   containers:
-  - name: cpustress-containter
-    image: knopt/scipy:1804
-    imagePullPolicy: Always
-    resources:
-      limits:
-        cpu: "2.0"
-        memory: "100Mi"
-      requests:
-        cpu: "1.0"
-        memory: "50Mi"
-    command: ["python3"]
-    args: ["stresscpu.py", "--window-size", "1m", "--dist", "DIST-PLACEHOLDER"]
+    - name: cpustress-containter
+      image: knopt/scipy:250401
+      imagePullPolicy: IfNotPresent
+      resources:
+        limits:
+          cpu: "0.4"
+          memory: "200Mi"
+        requests:
+          cpu: "0.2"
+          memory: "100Mi"
+      command: ["python3"]
+      args: ["stresscpu.py", "--window-size", "1m", "--dist", "DIST-PLACEHOLDER", "--timeout", "6m"]

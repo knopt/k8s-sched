@@ -2,9 +2,9 @@
   "apiVersion": "v1",
   "kind": "Namespace",
   "metadata": {
-    "name": "cpustress-namespace",
+    "name": "cpustress",
     "labels": {
-      "name": "cpustress-namespace"
+      "name": "cpustress"
     }
   }
 }

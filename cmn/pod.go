@@ -4,6 +4,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/knopt/k8s-sched-extender/coreclient"
 	v1 "k8s.io/api/core/v1"
+
 	"math"
 )
 
@@ -14,10 +15,8 @@ type PodStats struct {
 func PodMeanStd(pod *v1.Pod) (*PodStats, error) {
 	dist, err := FloatsFromString(pod.Annotations["dist"])
 	if err != nil {
-		glog.Error(err)
 		return nil, err
 	}
-
 	return &PodStats{Mean: Mean(dist), Std: Std(dist)}, nil
 }
 
@@ -30,6 +29,9 @@ func NodePodsStats(node string) ([]*PodStats, error) {
 	res := make([]*PodStats, 0, len(pods))
 
 	for _, pod := range pods {
+		if _, ok := pod.Annotations["dist"]; !ok {
+			continue
+		}
 		stats, err := PodMeanStd(&pod)
 		if err != nil {
 			return nil, err
@@ -50,6 +52,10 @@ func PodNodeP(pod *v1.Pod, node v1.Node, p float64) (float64, error) {
 		return 0, err
 	}
 
+	for _, s := range stats {
+		glog.Errorf("pod stats: %v\n", s)
+	}
+
 	var meanSum, stdSum float64
 	for _, stat := range stats {
 		meanSum += stat.Mean
@@ -65,7 +71,7 @@ func PodNodeP(pod *v1.Pod, node v1.Node, p float64) (float64, error) {
 	actualP := 1 - NormalCDF(meanSum, stdSum, nodeCap)
 	fitsP := p - actualP
 
-	glog.Errorf("pod %s fits node %s: %d\n", pod.Name, node.Name, fitsP)
+	glog.Errorf("pod %s fits node %s: %f\n", pod.Name, node.Name, fitsP)
 	return fitsP, nil
 }
 

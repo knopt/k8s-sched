@@ -89,7 +89,7 @@ def any_cpu_load(cpu_load, timeout, window_size, dist):
     while True:
         for load in dist:
             print("running with {}".format(str(load)))
-            subprocess.run(["stress-ng", "--cpu", "1", "-l", str(load), "--timeout", "{}s".format(window_size)])
+            subprocess.run(["stress-ng", "--cpu", "1", "-l", str(load), "--timeout", "{}s".format(window_size), "--cpu-load-slice", "5"])
             steps_done += 1
             if steps_done >= steps:
                 return

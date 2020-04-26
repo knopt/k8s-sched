@@ -89,12 +89,12 @@ spec:
               mountPath: /tknopik-scheduler
           resources:
             limits:
-              memory: "1000Mi"
-            requests:
               memory: "500Mi"
+            requests:
+              memory: "300Mi"
         - name: tknopik-scheduler-extender-ctr
           image: knopt/k8s-ext:3110
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /version
@@ -112,7 +112,7 @@ spec:
               protocol: TCP
           resources:
             limits:
-              memory: "1000Mi"
-            requests:
               memory: "500Mi"
-      serviceAccount: admin-user
+            requests:
+              memory: "300Mi"
+      serviceAccount: user

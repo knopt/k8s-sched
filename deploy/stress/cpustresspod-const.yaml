@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: cpustress-const-50
-  namespace: cpustress-namespace
+  namespace: cpustress
   labels:
     app: cpustress-const
 spec:
