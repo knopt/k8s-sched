@@ -70,7 +70,7 @@ spec:
     metadata:
       labels:
         app: tknopik-scheduler
-        version: 0.0.34
+        version: 0.0.35
     spec:
       volumes:
         - name: tknopik-scheduler-config
@@ -93,8 +93,8 @@ spec:
             requests:
               memory: "300Mi"
         - name: tknopik-scheduler-extender-ctr
-          image: knopt/k8s-ext:3110
-          imagePullPolicy: IfNotPresent
+          image: knopt/k8s-ext:100501
+          imagePullPolicy: Always
           livenessProbe:
             httpGet:
               path: /version

@@ -21,13 +21,15 @@ const (
 	filterPrefix     = apiPrefix + "/filter"
 	prioritizePrefix = apiPrefix + "/prioritize"
 	preemptionPrefix = apiPrefix + "/preemption"
+
+	percentage = 0.50
 )
 
 var (
 	filter = sched.Filter{
 		Name: "p95_filter",
 		Func: func(node v1.Node, pod *v1.Pod) bool {
-			fits, err := cmn.PodFitsNode(pod, node, 0.95)
+			fits, err := cmn.PodFitsNode(pod, node, percentage)
 			if err != nil {
 				glog.Error(err)
 				return false
@@ -43,7 +45,7 @@ var (
 			hostPriorityList = make([]schedulerapi.HostPriority, len(nodes))
 			for i, node := range nodes {
 				glog.Warningf("node %s cpu capacity %s, allocatable %s", node.Name, node.Status.Capacity.Cpu(), node.Status.Allocatable.Cpu())
-				fitsP, err := cmn.PodNodeP(&pod, node, 0.95)
+				fitsP, err := cmn.PodNodeP(&pod, node, percentage)
 				if err != nil {
 					return nil, err
 				}
@@ -68,8 +70,7 @@ func main() {
 	http.HandleFunc(preemptionPrefix, preemptionHandler)
 	http.HandleFunc(versionPath, versionHandler)
 
-	glog.Error("serving at localhost:8080")
-
+	glog.Warning("serving at localhost:8080")
 	glog.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -81,8 +82,6 @@ func checkBody(w http.ResponseWriter, r *http.Request) {
 }
 
 func filterHandler(w http.ResponseWriter, r *http.Request) {
-	glog.Errorf("filter: %v", r)
-
 	checkBody(w, r)
 
 	var buf bytes.Buffer
@@ -134,8 +133,6 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 		hostPriorityList = list
 	}
 
-	glog.Errorf("priority list: %v", hostPriorityList)
-
 	if resultBody, err := json.Marshal(hostPriorityList); err != nil {
 		panic(err)
 	} else {
@@ -147,7 +144,21 @@ func prioritizeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func preemptionHandler(w http.ResponseWriter, r *http.Request) {
-	glog.Errorf("%v", r)
+	if r == nil {
+		glog.Errorf("preemption request nil")
+		return
+	}
+	reader, err := r.GetBody()
+	if err != nil {
+		glog.Errorf("preemption error")
+		return
+	}
+
+	buf := bytes.NewBuffer(make([]byte, 0, 1000))
+	buf.ReadFrom(reader)
+	reader.Close()
+
+	glog.Errorf("preemption %v", buf.String())
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {

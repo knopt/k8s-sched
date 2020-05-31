@@ -14,7 +14,7 @@ spec:
         cpu: "1.0"
         memory: "400Mi"
       requests:
-        cpu: "0.5"
+        cpu: "0.01"
         memory: "300Mi"
     command: ["python3"]
     args: ["stresscpu.py", "--cpu-load", "0.5", "--dist", "uniform", "--window-size", "3s"]

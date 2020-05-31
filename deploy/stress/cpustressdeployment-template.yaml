@@ -6,7 +6,6 @@ metadata:
   labels:
     app: cpustress-app
 spec:
-  replicas: 10
   selector:
     matchLabels:
       app: cpustress-app
@@ -22,14 +21,14 @@ spec:
       schedulerName: tknopik-scheduler
       containers:
         - name: cpustress-containter
-          image: knopt/scipy:250401
+          image: knopt/scipy:2604
           imagePullPolicy: IfNotPresent
-#          resources:
-#            limits:
-#              cpu: "0.4"
+          resources:
+            limits:
+              cpu: "1"
 #              memory: "200Mi"
-#            requests:
-#              cpu: "0.2"
+            requests:
+              cpu: "0.01"
 #              memory: "100Mi"
           command: ["python3"]
-          args: ["stresscpu.py", "--window-size", "1m", "--dist", "DIST-PLACEHOLDER", "--timeout", "4m"]
+          args: ["stresscpu.py", "--window-size", "1m", "--dist", "DIST-PLACEHOLDER", "--timeout", "8m"]

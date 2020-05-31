@@ -137,12 +137,12 @@ func Std(fs []float64) float64 {
 	return math.Sqrt(sd / float64(len(fs)))
 }
 
-func ToCpuCores(cpuResource *resource.Quantity) float64 {
-	cpuNanoCores, ok := cpuResource.AsInt64()
+func ToCpuCores(cpuResource *resource.Quantity) int64 {
+	cpuCores, ok := cpuResource.AsInt64()
 	if !ok {
-		cpuNanoCores = cpuResource.AsDec().UnscaledBig().Int64()
+		cpuCores = cpuResource.AsDec().UnscaledBig().Int64()
 	}
-	return float64(cpuNanoCores) / (1000 * 1000 * 1000)
+	return cpuCores
 }
 
 func NormalCDF(mean, std, x float64) float64 {

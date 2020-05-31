@@ -35,7 +35,7 @@ func (s *StatsRunner) Abort() {
 
 func (s *StatsRunner) Run() {
 	var (
-		ticker = time.NewTicker(fetchInterval)
+		ticker        = time.NewTicker(fetchInterval)
 		metricsGetter = NewMetrics()
 	)
 
@@ -71,7 +71,6 @@ func (s *StatsRunner) fetch(metricsGetter *Metrics) {
 		s.podsMetrics = podsMetrics
 		//glog.Warning("pod metrics: %v", cmn.PodMetrics2S(s.podsMetrics))
 	}
-
 }
 
 func (s *StatsRunner) PodsMetrics() *v1beta1.PodMetricsList {

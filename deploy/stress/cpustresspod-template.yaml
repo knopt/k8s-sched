@@ -8,18 +8,16 @@ metadata:
   annotations:
     dist: "DIST-PLACEHOLDER"
 spec:
-#  schedulerName: tknopik-scheduler
+  schedulerName: tknopik-scheduler
   restartPolicy: OnFailure
   containers:
     - name: cpustress-containter
-      image: knopt/scipy:250401
+      image: knopt/scipy:2604
       imagePullPolicy: IfNotPresent
       resources:
         limits:
-          cpu: "0.4"
-          memory: "200Mi"
+          cpu: "1.0"
         requests:
-          cpu: "0.2"
-          memory: "100Mi"
+          cpu: "0.01"
       command: ["python3"]
-      args: ["stresscpu.py", "--window-size", "1m", "--dist", "DIST-PLACEHOLDER", "--timeout", "6m"]
+      args: ["stresscpu.py", "--window-size", "1m", "--dist", "DIST-PLACEHOLDER", "--timeout", "8m"]

@@ -93,7 +93,7 @@ spec:
             requests:
               memory: "500Mi"
         - name: tknopik-scheduler-extender-ctr
-          image: knopt/k8s-ext:3110
+          image: knopt/k8s-ext:0905
           imagePullPolicy: Always
           livenessProbe:
             httpGet:

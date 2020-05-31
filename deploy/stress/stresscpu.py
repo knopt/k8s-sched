@@ -89,7 +89,7 @@ def any_cpu_load(cpu_load, timeout, window_size, dist):
     while True:
         for load in dist:
             print("running with {}".format(str(load)))
-            subprocess.run(["stress-ng", "--cpu", "1", "-l", str(load), "--timeout", "{}s".format(window_size), "--cpu-load-slice", "5"])
+            subprocess.run(["stress-ng", "--cpu", "1", "-l", str(load), "--timeout", "{}s".format(window_size), "--cpu-load-slice", "1"])
             steps_done += 1
             if steps_done >= steps:
                 return
@@ -111,6 +111,10 @@ timeout = s2d(args.timeout)
 cpu_load = args.cpu_load
 dist = args.dist
 sigma = args.sigma
+
+if sigma == 0:
+    d = min(cpu_load - args.min, args.max - cpu_load)
+    sigma = random.uniform(0, d)
 
 dist = try_parse_num_array(dist)
 
